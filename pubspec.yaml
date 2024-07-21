@@ -1,0 +1,48 @@
+name: artiuosa
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.3.4 <4.0.0'
+
+dependencies:
+  animate_do: ^3.3.4
+  firebase_core: ^3.2.0
+  firebase_storage: ^12.1.1
+  flutter:
+    sdk: flutter
+  flutter_colorpicker: ^1.1.0
+  flutter_launcher_icons: ^0.13.1
+  get: ^4.6.6
+  image_cropper: ^7.1.0
+  image_picker: ^1.1.2
+  model_viewer_plus: ^1.7.2
+  screenshot: ^2.5.0
+  shared_preferences: ^2.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/artiuosa.png"
+  min_sdk_android: 21 
+flutter:
+  assets:
+    - assets/images/
+    - assets/m/skull.glb
+  uses-material-design: true
+  fonts:
+    - family: cursive
+      fonts:
+        - asset: fonts/modernline.otf
+    - family: SF
+      fonts:
+        - asset: fonts/SFPRODISPLAYBOLD.otf
+        - asset: fonts/SFPRODISPLAYREGULAR.otf
+        - asset: fonts/SFPRODISPLAYMEDIUM.otf
+       
