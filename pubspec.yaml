@@ -34,12 +34,15 @@ flutter_launcher_icons:
 flutter:
   assets:
     - assets/images/
-    - assets/m/skull.glb
+    - assets/m/
   uses-material-design: true
   fonts:
     - family: cursive
       fonts:
         - asset: fonts/modernline.otf
+    - family: bile
+      fonts:
+        - asset: fonts/Bile.otf
     - family: SF
       fonts:
         - asset: fonts/SFPRODISPLAYBOLD.otf

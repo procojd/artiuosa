@@ -1,8 +1,8 @@
 class PrismacolorPencil {
   final String name;
   final String code;
-  final String hex;
-  final List<int> rgb;
+  late final String hex;
+  late final List<int> rgb;
 
   PrismacolorPencil({
     required this.name,
@@ -19,6 +19,7 @@ class PrismacolorPencil {
       rgb: List<int>.from(json['rgb']),
     );
   }
+  
 
   Map<String, dynamic> toJson() {
     return {
@@ -27,6 +28,25 @@ class PrismacolorPencil {
       'hex': hex,
       'rgb': rgb,
     };
+  }
+
+    Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'code': code,
+      'hex': hex,
+      'rgb': rgb,
+    };
+  }
+
+  // Create a PrismacolorPencil object from a Map
+  factory PrismacolorPencil.fromMap(Map<String, dynamic> map) {
+    return PrismacolorPencil(
+      name: map['name'],
+      code: map['code'],
+      hex: map['hex'],
+      rgb: List<int>.from(map['rgb']),
+    );
   }
 }
 

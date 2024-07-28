@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "351374889391",
+    "project_id": "artiuosa",
+    "storage_bucket": "artiuosa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:351374889391:android:05a22f37d3f8ce0cda1f5a",
+        "android_client_info": {
+          "package_name": "com.example.artiuosa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMrO6o8Sgs2gxilGNm1YSyttgpULnxGCg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -13,16 +13,32 @@ controller cc = Get.put(controller());
 Drawer newMethod(BuildContext context) {
   ColorScheme col = Theme.of(context).colorScheme;
   return Drawer(
+    elevation: 0,
     child: ListView(
       padding: EdgeInsets.zero,
       children: <Widget>[
         DrawerHeader(
-          decoration: BoxDecoration(),
+          
+          decoration: BoxDecoration(
+            
+          ),
           curve: Curves.easeInOutCubicEmphasized,
-          child: Text(
-            'Artiuosa',
-            style: TextStyle(
-                color: col.onBackground, fontSize: 24, fontWeight: FontWeight.bold),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'Artiuosa',
+                style: TextStyle(
+                  
+                    color: col.onPrimaryContainer, fontSize: 30, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'Unleash your creativity',
+                style: TextStyle(
+                    color: col.onPrimaryContainer, fontWeight: FontWeight.normal),
+              ),
+            ],
           ),
         ),
         Padding(

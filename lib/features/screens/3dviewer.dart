@@ -21,32 +21,37 @@ class _Viewer3dState extends State<Viewer3d> {
   double _brightness = 1.0;
   bool _Controls = true;
   String? _modelUrl;
-  String _selectedModel = 'skull.glb';
+  String _selectedModel = '1.glb';
   bool _isLoading = true;
+  bool _cameraControls = true;
 
-  final List<String> _models = ['loomis_head.glb', 'skull_downloadable.glb'];
+  final List<String> _models = ['1.glb', '2.glb','3.glb',];
   ScreenshotController _screenshotController = ScreenshotController();
-
-  Future<void> _fetchModelUrl(String model) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      String downloadURL = await FirebaseStorage.instance
-          .ref('3dmodel/$model')
-          .getDownloadURL();
-      setState(() {
-        _modelUrl = downloadURL;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print('Failed to get download URL: $e');
-    }
+  void initState() {
+    super.initState();
+    // _fetchModelUrl(_selectedModel);
   }
+
+  // Future<void> _fetchModelUrl(String model) async {
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+
+  //   try {
+  //     String downloadURL =
+  //         await FirebaseStorage.instance.ref('3dmodel/$model').getDownloadURL();
+  //     setState(() {
+  //       _modelUrl = downloadURL;
+  //       print(downloadURL);
+  //       _isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+  //     print('Failed to get download URL: $e');
+  //   }
+  // }
 
   Future<void> _saveScreenshot() async {
     final Uint8List? image = await _screenshotController.capture();
@@ -99,23 +104,16 @@ class _Viewer3dState extends State<Viewer3d> {
                       ],
                       stops: [0.4, 1.0],
                     )),
-                child: Screenshot(
-                  controller: _screenshotController,
-                  child: ColorFiltered(
-                    colorFilter: ColorFilter.mode(
-                      Colors.white.withOpacity(_brightness),
-                      BlendMode.modulate,
-                    ),
-                    child: ModelViewer(
-                      src: 'assets/m/skull.glb', // Path to your converted .gl
-                      alt: "A 3D model of an object",
-
-                      cameraControls: _Controls,
-
-                      exposure: _brightness,
-                    ),
-                  ),
-                ),
+                child:  Screenshot(
+                        controller: _screenshotController,
+                        child: ModelViewer(
+                          key: ValueKey(
+                              _selectedModel), // This ensures the widget rebuilds
+                          src: 'assets/m/$_selectedModel',
+                          alt: "A 3D model of an object",
+                          cameraControls: _cameraControls,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -151,11 +149,12 @@ class _Viewer3dState extends State<Viewer3d> {
                         if (newValue != null) {
                           setState(() {
                             _selectedModel = newValue;
-                            _fetchModelUrl(_selectedModel);
+                           
                           });
                         }
                       },
                     ),
+                    // PopupMenuButton(itemBuilder: itemBuilder)
                   ],
                 ),
                 Row(

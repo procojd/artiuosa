@@ -1,12 +1,16 @@
+import 'dart:js_util';
 import 'dart:ui';
 
 import 'package:animate_do/animate_do.dart';
+import 'package:artiuosa/controller.dart';
 import 'package:artiuosa/model/colormode.dart';
+import 'package:artiuosa/model/savemodel.dart';
 import 'package:artiuosa/ui/colors.dart';
 import 'package:artiuosa/ui/drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:get/get.dart';
 
 class ColorMixScreen extends StatefulWidget {
   @override
@@ -14,13 +18,13 @@ class ColorMixScreen extends StatefulWidget {
 }
 
 class _ColorMixScreenState extends State<ColorMixScreen> {
-  
-  List<Color> selectedColors = [Colors.red, Colors.white];
+  final controller ac = Get.put(controller());
+
   int selectedColorIndex = 0;
   Color mixedColor = Color.fromARGB(255, 180, 180, 180);
 
   void _selectColor(int index) async {
-    Color selectedColor = selectedColors[index];
+    Color selectedColor = ac.availablePencils[index].hex.toColor()!;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -31,7 +35,8 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
               pickerColor: selectedColor,
               onColorChanged: (color) {
                 setState(() {
-                  selectedColors[index] = color;
+                  ac.availablePencils[index].hex = color.toHexString();
+                  ac.availablePencils[index].rgb = [color.red,color.green,color.blue];
                 });
               },
               showLabel: true,
@@ -40,7 +45,7 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: Text('Got it'),
+              child: Text('ok'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -52,18 +57,20 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
   }
 
   void _mixColors() {
-    if (selectedColors.length >= 2) {
+    if (ac.availablePencils.length >= 2) {
       int red = 0;
       int green = 0;
       int blue = 0;
-      for (var color in selectedColors) {
-        red += color.red;
-        green += color.green;
-        blue += color.blue;
+
+      for (var pencil in ac.availablePencils) {
+        red += pencil.rgb[0];
+        green += pencil.rgb[1];
+        blue += pencil.rgb[2];
       }
-      red = (red / selectedColors.length).toInt();
-      green = (green / selectedColors.length).toInt();
-      blue = (blue / selectedColors.length).toInt();
+
+      red = (red / ac.availablePencils.length).toInt();
+      green = (green / ac.availablePencils.length).toInt();
+      blue = (blue / ac.availablePencils.length).toInt();
 
       setState(() {
         mixedColor = Color.fromRGBO(red, green, blue, 1.0);
@@ -71,27 +78,12 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
     }
   }
 
-  void _addColor() {
-    if (selectedColors.length < 5) {
-      setState(() {
-        selectedColors.add(Colors.blue);
-      });
-    }
-  }
-
-  void _removeColor(int index) {
-    if (selectedColors.length > 2) {
-      setState(() {
-        selectedColors.removeAt(index);
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final controller ac = Get.put(controller());
+
     ColorScheme col = Theme.of(context).colorScheme;
     return Scaffold(
-      
       drawer: ClipRRect(
         child: newMethod(context),
       ),
@@ -113,12 +105,21 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 IconButton.filled(
-                  onPressed: _addColor,
+                  onPressed: () {
+                    // ac._addColor('#008ACF');
+                    ac.addColorModel(PrismacolorPencil(
+                      name: 'picked',
+                      code: 'Custom',
+                      hex: '#008ACF',
+                      rgb: [0, 138, 207],
+                    ));
+                  },
                   icon: Icon(Icons.add),
                 ),
                 FilledButton(
-                  onPressed: () {
-                    showPencilDialog(context);
+                  onPressed: () async {
+                    await showPencilDialog(context);
+                    setState(() {});
                   },
                   child: Text('Palette'),
                 ),
@@ -149,52 +150,89 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
             ),
             SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
-                itemCount: selectedColors.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    child: ListTile(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      tileColor: col.secondaryContainer,
-                      leading: Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          gradient: RadialGradient(
-                            colors: [
-                              selectedColors[index],
-                              Colors.black,
-                            ],
-                            center:
-                                Alignment(0.0, 0.2), // Center of the gradient
-                            radius: 1.5, // Radius of the gradient
-                            stops: [0.28, 1.0], // Where the colors should stop
+              child: Obx(() {
+                return ListView.builder(
+                  itemCount: ac.availablePencils.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        tileColor: col.secondaryContainer,
+                        leading: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              colors: [
+                                ac.availablePencils[index].hex.toColor()!,
+                                Colors.black,
+                              ],
+                              center:
+                                  Alignment(0.0, 0.2), // Center of the gradient
+                              radius: 1.5, // Radius of the gradient
+                              stops: [
+                                0.28,
+                                1.0
+                              ], // Where the colors should stop
+                            ),
+                            shape: BoxShape.circle,
+                            color: ac.availablePencils[index].hex.toColor()!,
                           ),
-                          shape: BoxShape.circle,
-                          color: selectedColors[index],
                         ),
+                        title: Text(
+                          'Hex Code',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${ac.availablePencils[index].hex}',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        trailing: IconButton(
+                            icon: Icon(Icons.cancel_rounded),
+                            onPressed: () {
+                              ac.removeColor(index);
+                              setState(() {});
+                            }),
+                        onTap: () => _selectColor(index),
                       ),
-                      title: Text(
-                        'Hex Code',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        '${selectedColors[index].toHexString()}',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.cancel_rounded),
-                        onPressed: () => _removeColor(index),
-                      ),
-                      onTap: () => _selectColor(index),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                );
+              }),
             ),
+            Spacer(),
+            FilledButton.tonal(
+                onPressed: () {
+                  List<PrismacolorPencil> pencils = [
+                    PrismacolorPencil(
+                      name: 'Red',
+                      code: 'PC923',
+                      hex: '#F00',
+                      rgb: [255, 0, 0],
+                    ),
+                    PrismacolorPencil(
+                      name: 'Blue',
+                      code: 'PC903',
+                      hex: '#00F',
+                      rgb: [0, 0, 255],
+                    ),
+                  ];
+                  cm colorModel = cm(
+                    name: 'ExampleColor',
+                    hex: '#ABCDEF',
+                    pencils: ac.availablePencils
+                  );
+
+                  // Create a ColorModel instance
+
+                  ac.savecm(colorModel);
+                },
+                child: Text('Save')),
+            SizedBox(
+              height: 20,
+            )
           ],
         ),
       ),
@@ -202,8 +240,9 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
   }
 }
 
-void showPencilDialog(BuildContext context) {
+Future<void> showPencilDialog(BuildContext context) async {
   final ScrollController _scrollController = ScrollController();
+  final controller ac = Get.put(controller());
   final Map<String, int> _indexMap = {};
 
   // Populate the index map
@@ -219,14 +258,15 @@ void showPencilDialog(BuildContext context) {
     builder: (context) {
       ColorScheme col = Theme.of(context).colorScheme;
       return AlertDialog(
-        
+        contentPadding: EdgeInsets.symmetric(horizontal: 25),
         backgroundColor: col.background,
         content: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
-            
           ),
-          width: double.maxFinite,
+          // width: double.maxFinite,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -234,68 +274,70 @@ void showPencilDialog(BuildContext context) {
                 child: Stack(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(right:20.0),
+                      padding: const EdgeInsets.only(right: 0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: ListView.builder(
-                          controller: _scrollController,
+                          // controller: _scrollController,
+                          physics: BouncingScrollPhysics(),
                           itemCount: prismacolorPencils.length,
                           itemBuilder: (context, index) {
                             final pencil = prismacolorPencils[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 0.0,),
-                                    child: Card(
-                                      margin: EdgeInsets.only(top:4.0,right: 4,left:4,bottom:4),
-                                      child: ListTile(
-                                        leading: Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                          
-                        color: pencil.hex.toColor(),
-                        shape: BoxShape.circle,
-                        
-                              gradient: RadialGradient(
-                                colors: [
-                                  pencil.hex.toColor()!,
-                                  Colors.black,
-                                ],
-                                center:
-                                    Alignment(0.0, 0.2), // Center of the gradient
-                                radius: 1.5, // Radius of the gradient
-                                stops: [0.28, 1.0], // Where the colors should stop
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                right: 0.0,
                               ),
-                             
-                            
-                        
-                                          ),
-                                        ),
-                                        title: Text(pencil.name,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                                        subtitle: Text(pencil.code),
-                                      ),
+                              child: ListTile(
+                                onTap: () {
+                                  ac.addColorModel(pencil);
+                                },
+                                leading: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: pencil.hex.toColor(),
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        pencil.hex.toColor()!,
+                                        Colors.black,
+                                      ],
+                                      center: Alignment(
+                                          0.0, 0.2), // Center of the gradient
+                                      radius: 1.5, // Radius of the gradient
+                                      stops: [
+                                        0.28,
+                                        1.0
+                                      ], // Where the colors should stop
                                     ),
-                                  );
+                                  ),
+                                ),
+                                title: Text(pencil.name,
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                subtitle: Text(pencil.code),
+                              ),
+                            );
                           },
                         ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: AlphabetScrollbar(
-                      
-                        onLetterTap: (String letter) {
-                          if (_indexMap.containsKey(letter)) {
-                            _scrollController.animateTo(
-                              _indexMap[letter]! *
-                                  56.0, // Adjust 56.0 based on ListTile height
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeInOutCubicEmphasized,
-                            );
-                          }
-                        },
-                      ),
-                    ),
+                    // Align(
+                    //   alignment: Alignment.centerRight,
+                    //   child: AlphabetScrollbar(
+
+                    //     onLetterTap: (String letter) {
+                    //       if (_indexMap.containsKey(letter)) {
+                    //         _scrollController.animateTo(
+                    //           _indexMap[letter]! *
+                    //               150.0, // Adjust 56.0 based on ListTile height
+                    //           duration: Duration(milliseconds: 300),
+                    //           curve: Curves.easeInOutCubicEmphasized,
+                    //         );
+                    //       }
+                    //     },
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -319,11 +361,9 @@ class AlphabetScrollbar extends StatelessWidget {
     ColorScheme col = Theme.of(context).colorScheme;
     return Container(
       margin: EdgeInsets.symmetric(vertical: 20.0),
-      
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: col.secondaryContainer
-      ),
+          borderRadius: BorderRadius.circular(10),
+          color: col.secondaryContainer),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: alphabet.map((letter) {
@@ -333,7 +373,10 @@ class AlphabetScrollbar extends StatelessWidget {
               padding: EdgeInsets.all(2.0),
               child: Text(
                 letter,
-                style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold,color: col.onSecondaryContainer),
+                style: TextStyle(
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.bold,
+                    color: col.onSecondaryContainer),
               ),
             ),
           );
