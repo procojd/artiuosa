@@ -1,8 +1,8 @@
 class PrismacolorPencil {
   final String name;
   final String code;
-  late final String hex;
-  late final List<int> rgb;
+  late  String hex;
+  late  List<int> rgb;
 
   PrismacolorPencil({
     required this.name,

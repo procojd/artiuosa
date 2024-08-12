@@ -1,14 +1,9 @@
-import 'dart:js_util';
-import 'dart:ui';
-
-import 'package:animate_do/animate_do.dart';
 import 'package:artiuosa/controller.dart';
 import 'package:artiuosa/model/colormode.dart';
 import 'package:artiuosa/model/savemodel.dart';
-import 'package:artiuosa/ui/colors.dart';
+import 'package:artiuosa/ui/bottomsheet.dart';
 import 'package:artiuosa/ui/drawer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 
@@ -18,7 +13,10 @@ class ColorMixScreen extends StatefulWidget {
 }
 
 class _ColorMixScreenState extends State<ColorMixScreen> {
+  
   final controller ac = Get.put(controller());
+  
+  TextEditingController tc =TextEditingController();
 
   int selectedColorIndex = 0;
   Color mixedColor = Color.fromARGB(255, 180, 180, 180);
@@ -33,10 +31,24 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
           content: SingleChildScrollView(
             child: ColorPicker(
               pickerColor: selectedColor,
+              hexInputBar: true,
+              enableAlpha: false,
+              hexInputController:tc,
+
+              labelTypes: [ColorLabelType.rgb],
+              
               onColorChanged: (color) {
+                print(color.red);
+                print(color.toHexString());
+                
                 setState(() {
-                  ac.availablePencils[index].hex = color.toHexString();
-                  ac.availablePencils[index].rgb = [color.red,color.green,color.blue];
+                  ac.availablePencils[index].hex = tc.text;
+                  print(color.red);
+                  ac.availablePencils[index].rgb = [
+                    color.red,
+                    color.green,
+                    color.blue
+                  ];
                 });
               },
               showLabel: true,
@@ -81,6 +93,7 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
   @override
   Widget build(BuildContext context) {
     final controller ac = Get.put(controller());
+    ac.loadColorModels();
 
     ColorScheme col = Theme.of(context).colorScheme;
     return Scaffold(
@@ -107,7 +120,7 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
                 IconButton.filled(
                   onPressed: () {
                     // ac._addColor('#008ACF');
-                    ac.addColorModel(PrismacolorPencil(
+                    ac.addcm(PrismacolorPencil(
                       name: 'picked',
                       code: 'Custom',
                       hex: '#008ACF',
@@ -123,6 +136,9 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
                   },
                   child: Text('Palette'),
                 ),
+                IconButton.filled(onPressed: (){
+                  showSavedColors(context);
+                }, icon: Icon(Icons.archive), ),
                 Spacer(),
                 FilledButton.tonal(
                   onPressed: _mixColors,
@@ -158,11 +174,11 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       child: ListTile(
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(40)),
                         tileColor: col.secondaryContainer,
                         leading: Container(
-                          width: 30,
-                          height: 30,
+                          width: 45,
+                          height: 45,
                           decoration: BoxDecoration(
                             gradient: RadialGradient(
                               colors: [
@@ -192,7 +208,7 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
                         trailing: IconButton(
                             icon: Icon(Icons.cancel_rounded),
                             onPressed: () {
-                              ac.removeColor(index);
+                              ac.removecm(index);
                               setState(() {});
                             }),
                         onTap: () => _selectColor(index),
@@ -202,7 +218,7 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
                 );
               }),
             ),
-            Spacer(),
+            
             FilledButton.tonal(
                 onPressed: () {
                   List<PrismacolorPencil> pencils = [
@@ -220,12 +236,11 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
                     ),
                   ];
                   cm colorModel = cm(
-                    name: 'ExampleColor',
-                    hex: '#ABCDEF',
-                    pencils: ac.availablePencils
-                  );
+                      name: 'ExampleColor',
+                      hex: mixedColor.toHexString(),
+                      pencils: ac.availablePencils);
 
-                  // Create a ColorModel instance
+                  // Create a cm instance
 
                   ac.savecm(colorModel);
                 },
@@ -289,7 +304,7 @@ Future<void> showPencilDialog(BuildContext context) async {
                               ),
                               child: ListTile(
                                 onTap: () {
-                                  ac.addColorModel(pencil);
+                                  ac.addcm(pencil);
                                 },
                                 leading: Container(
                                   width: 40,

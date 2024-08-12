@@ -1,6 +1,5 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:artiuosa/features/homescreen/homescreen.dart';
-import 'package:artiuosa/ui/colors.dart';
 import 'package:flutter/material.dart';
 
 class splash_screen extends StatefulWidget {

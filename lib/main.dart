@@ -1,17 +1,15 @@
-import 'package:artiuosa/features/homescreen/homescreen.dart';
 import 'package:artiuosa/features/splashscreen/splashscreen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -30,9 +28,14 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
           fontFamily: 'SF',
           useMaterial3: true,
-          colorSchemeSeed: Colors.deepPurple),
-      darkTheme: ThemeData.dark(
+          colorSchemeSeed: Colors.blueAccent),
+      darkTheme: ThemeData(
+        fontFamily: 'SF',
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blueAccent,
+          brightness: Brightness.dark,
+        ),
       ),
       themeMode: ThemeMode.system,
     );

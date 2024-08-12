@@ -1,18 +1,14 @@
-import 'dart:ffi';
+import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:animate_do/animate_do.dart';
-import 'package:artiuosa/features/screens/colormix.dart';
 import 'package:artiuosa/ui/colors.dart';
 import 'package:artiuosa/ui/drawer.dart';
 import 'package:artiuosa/ui/gridpainter.dart';
 import 'package:artiuosa/ui/modalsheet.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,8 +22,13 @@ class home_screen extends StatefulWidget {
 class _home_screenState extends State<home_screen> {
   File? _image;
   final String _imagePathKey = 'image_path';
+  final String imagewidth = 'image width';
+  final String imageheight = 'image height';
   double scale = 1.0;
-
+  late double img_height;
+  late double img_width;
+  ui.Size? _imageSize;
+  late ui.Size imageSize;
   @override
   void initState() {
     super.initState();
@@ -37,37 +38,76 @@ class _home_screenState extends State<home_screen> {
   Future<void> _loadImagePath() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? imagePath = prefs.getString(_imagePathKey);
+    String? imgw = prefs.getString(imagewidth);
+    String? imgh = prefs.getString(imageheight);
     if (imagePath != null) {
       setState(() {
         _image = File(imagePath);
+        img_width = double.parse(imgw ?? '20.0');
+        img_height = double.parse(imgh ?? '20.0');
       });
     }
   }
+
+  // Future<void> _pickImage() async {
+  //   final picker = ImagePicker();
+  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _image = File(pickedFile.path);
+  //     });
+  //     SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     await prefs.setString(_imagePathKey, pickedFile.path);
+  //   }
+  // }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
+      final imageFile = File(pickedFile.path);
+
+      // Get image dimensions
+      _imageSize = await _getImageSize(imageFile);
+
+      // Update state with image and its dimensions
       setState(() {
-        _image = File(pickedFile.path);
+        _image = imageFile;
+        imageSize = _imageSize!;
+        print('//////////${imageSize.height}');
+        img_width = imageSize.width;
+        img_height = imageSize.height;
       });
+
+      // Save image path to SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString(_imagePathKey, pickedFile.path);
+      await prefs.setString(imagewidth, imageSize.width.toString());
+      await prefs.setString(imageheight, imageSize.height.toString());
     }
   }
 
-  int _selectedIndex = 0;
+  Future<ui.Size> _getImageSize(File imageFile) async {
+    final completer = Completer<ui.Size>();
+    final image = Image.file(imageFile);
+    image.image.resolve(ImageConfiguration()).addListener(
+      ImageStreamListener((ImageInfo info, bool _) {
+        completer.complete(
+            ui.Size(info.image.width.toDouble(), info.image.height.toDouble()));
+      }),
+    );
 
-  void _onItemTap(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    Navigator.pop(context); // Close the drawer
+    return completer.future;
   }
+
+
+  
 
   @override
   Widget build(BuildContext context) {
+    
+    final width = MediaQuery.sizeOf(context).width;
     return Scaffold(
       drawer: ClipRRect(
         child: newMethod(context),
@@ -80,7 +120,7 @@ class _home_screenState extends State<home_screen> {
               : SizedBox(),
           IconButton(
               onPressed: () {
-               bot_sheet(context);
+                bot_sheet(context);
               },
               icon: Icon(Icons.more_vert_rounded)),
           Padding(
@@ -103,26 +143,38 @@ class _home_screenState extends State<home_screen> {
                 : Expanded(
                     child: LayoutBuilder(builder: (context, constraints) {
                       return InteractiveViewer(
-                        onInteractionUpdate: (details) {
-                          if (details.scale != 10.0 && details.scale != 1) {
-                            setState(() {
-                              scale = details.scale;
-                            });
-                          }
-                        },
+                        // onInteractionUpdate: (details) {
+                        //   if (details.scale != 10.0 && details.scale != 1) {
+                        //     setState(() {
+                        //       scale = details.scale;
+                        //     });
+                        //   }
+                        // },
                         minScale: 0.1,
                         maxScale: 10.0,
                         child: Center(
                           child: Stack(
                             children: [
                               FadeIn(child: Image.file(_image!)),
-                              CustomPaint(
+                              // CustomPaint(
+                              //   // size: Size(300, 300), // Size of the canvas
+                              //   painter: GoldenRatioGridPainter(),
+                              // ),
+                              Obx(() {return CustomPaint(
                                 painter: GridPainter(
-                                  imageWidth: constraints.maxWidth,
-                                  imageHeight: constraints.maxHeight,
-                                  scale: scale,
+                                  imageWidth: width,
+                                  imageHeight: (img_height*width)/img_width,
+                                  scale: ac.bottomsheet.value,
                                 ),
-                              ),
+                              );})
+                              // CustomPaint(
+                              //   painter: GridPainter(
+                              //     imageWidth: width,
+                              //     imageHeight: (img_height*width)/img_width,
+                              //     scale: double.parse(ac.color.value),
+                              //   ),
+                              // ),
+
                               // CustomPaint(
 
                               //   painter: GridPainter(
@@ -147,5 +199,6 @@ class _home_screenState extends State<home_screen> {
         ),
       ),
     );
+    
   }
 }

@@ -1,14 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:artiuosa/ui/drawer.dart';
-import 'package:artiuosa/ui/modalsheet.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:vector_math/vector_math_64.dart' as vector;
 
 class Viewer3d extends StatefulWidget {
   const Viewer3d({super.key});
