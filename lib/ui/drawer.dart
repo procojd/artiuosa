@@ -1,11 +1,9 @@
-import 'package:artiuosa/controller.dart';
+import 'package:artiuosa/controller/controller.dart';
+import 'package:artiuosa/features/homescreen/homescreen.dart';
 import 'package:artiuosa/features/screens/3dviewer.dart';
 import 'package:artiuosa/features/screens/colormix.dart';
-import 'package:artiuosa/features/homescreen/homescreen.dart';
 import 'package:artiuosa/features/screens/experiment.dart';
 import 'package:artiuosa/features/screens/mandala.dart';
-import 'package:artiuosa/ui/colors.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -114,6 +112,25 @@ Drawer newMethod(BuildContext context) {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => Viewer3d()),
+                );
+              }),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+          child: ListTile(
+              horizontalTitleGap: 30,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30)),
+              leading: Icon(Icons.view_in_ar_rounded),
+              title: Text('Mandala Grid'),
+              selected: cc.selectedindex.value == 3,
+              selectedTileColor: col.surfaceVariant,
+              selectedColor: col.onSurfaceVariant,
+              onTap: () {
+                cc.onItemTap(3);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MandalaHomePage()),
                 );
               }),
         ),

@@ -16,9 +16,9 @@ class Viewer3d extends StatefulWidget {
 class _Viewer3dState extends State<Viewer3d> {
   double _brightness = 1.0;
   bool _Controls = true;
-  String? _modelUrl;
+  // String? _modelUrl;
   String _selectedModel = '1.glb';
-  bool _isLoading = true;
+  // bool _isLoading = true;
   bool _cameraControls = true;
 
   final List<String> _models = ['1.glb', '2.glb','3.glb',];

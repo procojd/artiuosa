@@ -26,7 +26,7 @@ class _cropState extends State<crop> {
     showDialog(
       context: context,
       builder: (context) {
-        ColorScheme col = Theme.of(context).colorScheme;
+        // ColorScheme col = Theme.of(context).colorScheme;
         return AlertDialog(
          
         
@@ -151,7 +151,7 @@ class _PaperSizeSelectionState extends State<PaperSizeSelection> {
 
   @override
   Widget build(BuildContext context) {
-    ColorScheme col = Theme.of(context).colorScheme;
+    // ColorScheme col = Theme.of(context).colorScheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

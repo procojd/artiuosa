@@ -1,5 +1,5 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:artiuosa/controller.dart';
+import 'package:artiuosa/controller/controller.dart';
 import 'package:artiuosa/model/colormode.dart';
 import 'package:artiuosa/model/savemodel.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ void showSavedColors(BuildContext context) async {
   final controller ac = Get.put(controller());
   ac.loadColorModels();
   // List<cm>? colorModels = await ac.getcm();
-  if (ac.colorModels != null && ac.colorModels.isNotEmpty) {
+  if (ac.colorModels.isNotEmpty) {
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 0.7,
       context: context,

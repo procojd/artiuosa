@@ -1,4 +1,4 @@
-import 'package:artiuosa/controller.dart';
+import 'package:artiuosa/controller/controller.dart';
 import 'package:artiuosa/model/colormode.dart';
 import 'package:artiuosa/model/savemodel.dart';
 import 'package:artiuosa/ui/bottomsheet.dart';
@@ -221,20 +221,20 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
             
             FilledButton.tonal(
                 onPressed: () {
-                  List<PrismacolorPencil> pencils = [
-                    PrismacolorPencil(
-                      name: 'Red',
-                      code: 'PC923',
-                      hex: '#F00',
-                      rgb: [255, 0, 0],
-                    ),
-                    PrismacolorPencil(
-                      name: 'Blue',
-                      code: 'PC903',
-                      hex: '#00F',
-                      rgb: [0, 0, 255],
-                    ),
-                  ];
+                  // List<PrismacolorPencil> pencils = [
+                  //   PrismacolorPencil(
+                  //     name: 'Red',
+                  //     code: 'PC923',
+                  //     hex: '#F00',
+                  //     rgb: [255, 0, 0],
+                  //   ),
+                  //   PrismacolorPencil(
+                  //     name: 'Blue',
+                  //     code: 'PC903',
+                  //     hex: '#00F',
+                  //     rgb: [0, 0, 255],
+                  //   ),
+                  // ];
                   cm colorModel = cm(
                       name: 'ExampleColor',
                       hex: mixedColor.toHexString(),
@@ -256,7 +256,7 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
 }
 
 Future<void> showPencilDialog(BuildContext context) async {
-  final ScrollController _scrollController = ScrollController();
+
   final controller ac = Get.put(controller());
   final Map<String, int> _indexMap = {};
 

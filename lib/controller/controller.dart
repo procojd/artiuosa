@@ -79,7 +79,7 @@ class controller extends GetxController {
     // Close the drawer
   }
 
-  static const String _colorModelKey = 'colorModel';
+  // static const String _colorModelKey = 'colorModel';
   RxList colorModels = [].obs;
   // Save a cm to Shared Preferences
   // Future<void> savecm(cm colorModel) async {

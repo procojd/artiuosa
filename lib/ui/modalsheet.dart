@@ -1,4 +1,4 @@
-import 'package:artiuosa/controller.dart';
+import 'package:artiuosa/controller/controller.dart';
 // import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
@@ -6,10 +6,10 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart' as cp;
 import 'package:get/get.dart';
 
 void bot_sheet(BuildContext context) {
-  double _opacity = 1.0;
-  Color _selectedColor = Colors.black;
-  bool _showOpacitySlider = false;
-  bool _showColorSlider = false;
+  // double _opacity = 1.0;
+  // Color _selectedColor = Colors.black;
+  // bool _showOpacitySlider = false;
+  // bool _showColorSlider = false;
   final Map mp = {
     'S': 0.3,
     'M': 0.6,
