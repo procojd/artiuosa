@@ -4,6 +4,7 @@ import 'package:artiuosa/model/colormode.dart';
 import 'package:artiuosa/model/savemodel.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class controller extends GetxController {
@@ -220,5 +221,20 @@ class controller extends GetxController {
   Future<bool> getSquareGrid({bool defaultValue = true}) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('square_grid') ?? defaultValue;
+  }
+
+    CropAspectRatio getCropAspectRatio(String paperSize, String orientation) {
+    switch (paperSize) {
+      case 'A4':
+        return orientation == 'Portrait'
+            ? CropAspectRatio(ratioX: 210, ratioY: 297)
+            : CropAspectRatio(ratioX: 297, ratioY: 210);
+      case 'A5':
+        return orientation == 'Portrait'
+            ? CropAspectRatio(ratioX: 148, ratioY: 210)
+            : CropAspectRatio(ratioX: 210, ratioY: 148);
+      default:
+        return CropAspectRatio(ratioX: 1, ratioY: 1);
+    }
   }
 }
