@@ -9,57 +9,77 @@ class GridPainter extends CustomPainter {
   final double imageWidth;
   final double imageHeight;
   final bool scale;
+  final double width;
 
-  GridPainter(
-      {required this.imageWidth,
-      required this.imageHeight,
-      required this.scale});
+  GridPainter({
+    required this.imageWidth,
+    required this.imageHeight,
+    required this.scale,
+    required this.width,
+  });
   final controller ac = Get.put(controller());
 
   @override
   void paint(Canvas canvas, Size size) {
+    print('this is the  size of painting ${imageWidth}');
+    print(ac.paperWidth);
     final paint = Paint()
       ..color = ac.color.value.toColor() ?? Colors.white
+      // ..strokeWidth = width
       ..strokeWidth = ac.strokeWidth.value
       ..style = PaintingStyle.stroke;
 
-    double step = 30.0;
+    double step = (imageWidth / ac.paperWidth.value) * ac.lineDistance.value;
 
-    for (double i = 0; i < imageWidth; i += step) {
-      canvas.drawLine(Offset(i, 0), Offset(i, imageHeight), paint);
-      //  _drawVerticalText(canvas, Offset(i, 0), (i/step).toInt().toString());
-    }
+    if (ac.squareGrid.value) {
+      for (double i = 0; i < imageWidth; i += step) {
+        canvas.drawLine(Offset(i, 0), Offset(i, imageHeight), paint);
+        //  _drawVerticalText(canvas, Offset(i, 0), (i/step).toInt().toString());
+      }
 
-    for (double i = 0; i < imageHeight; i += step) {
-      canvas.drawLine(Offset(0, i), Offset(imageWidth, i), paint);
-      // _drawHorizontalText(canvas, Offset(0, i), (i/step).toInt().toString());
+      for (double i = 0; i < imageHeight; i += step) {
+        canvas.drawLine(Offset(0, i), Offset(imageWidth, i), paint);
+        // _drawHorizontalText(canvas, Offset(0, i), (i/step).toInt().toString());
+      }
     }
     double margin = imageHeight % step;
-    print(imageHeight);
-    print(imageWidth);
-    print(step);
-    print(margin);
-    for (double i = 0; i <= imageWidth + step; i += step) {
-      for (double j = 0; j <= imageHeight; j += step) {
-        if (i + step <= imageWidth && j + step <= imageHeight) {
-          // Top-left to bottom-right diagonal
-          canvas.drawLine(Offset(i, j), Offset(i + step, j + step), paint);
+    // print(size.height);
+    // print(size.width);
+    // print(imageHeight);
+    // print(imageWidth);
+    // print(step);
+    // print(margin);
+    if (ac.diagonalLines.value) {
+      for (double i = 0; i <= imageWidth + step; i += step) {
+        for (double j = 0; j <= imageHeight; j += step) {
+          if (i + step <= imageWidth && j + step <= imageHeight) {
+            // Top-left to bottom-right diagonal
+            canvas.drawLine(Offset(i, j), Offset(i + step, j + step), paint);
 
-          // Top-right to bottom-left diagonal
-          canvas.drawLine(Offset(i + step, j), Offset(i, j + step), paint);
-        } else {
-          canvas.drawLine(Offset(i, j), Offset(i + margin, j + margin), paint);
-          print(i);
-          if (i < imageWidth - step) {
-            canvas.drawLine(Offset(i + step, j),
-                Offset(i + step - margin, j + margin), paint);
-          } else {
-            if (i >= imageWidth - step&&j<=imageHeight-step) {
-              canvas.drawLine(Offset(i + step, j), Offset(i, j + step), paint);
+            // Top-right to bottom-left diagonal
+            canvas.drawLine(Offset(i + step, j), Offset(i, j + step), paint);
+          }
+          //handling edge cases
+          else {
+//handling  "\" in right most column
+            if (i > imageWidth - step && j <= imageHeight - step) {
+              canvas.drawLine(Offset(i, j), Offset(i + step, j + step), paint);
+            } else {
+              canvas.drawLine(
+                  Offset(i, j), Offset(i + margin, j + margin), paint);
             }
-            else{
-              canvas.drawLine(Offset(i + step, j), Offset(i+step-margin, j + margin), paint);
-
+            // print(i);
+            if (i < imageWidth - step) {
+              canvas.drawLine(Offset(i + step, j),
+                  Offset(i + step - margin, j + margin), paint);
+            } else {
+              if (i >= imageWidth - step && j <= imageHeight - step) {
+                canvas.drawLine(
+                    Offset(i + step, j), Offset(i, j + step), paint);
+              } else {
+                canvas.drawLine(Offset(i + step, j),
+                    Offset(i + step - margin, j + margin), paint);
+              }
             }
           }
         }

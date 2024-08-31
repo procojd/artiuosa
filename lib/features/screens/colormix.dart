@@ -1,7 +1,7 @@
 import 'package:artiuosa/controller/controller.dart';
 import 'package:artiuosa/model/colormode.dart';
 import 'package:artiuosa/model/savemodel.dart';
-import 'package:artiuosa/ui/bottomsheet.dart';
+import 'package:artiuosa/ui/colormix_modalsheet.dart';
 import 'package:artiuosa/ui/drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';

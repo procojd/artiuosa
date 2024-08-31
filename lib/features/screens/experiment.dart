@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:artiuosa/ui/drawer.dart';
+import 'package:artiuosa/ui/papersize.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -18,33 +20,29 @@ class _cropState extends State<crop> {
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      _showPaperSizeDialog(File(pickedFile.path));
+      _showPaperSizeBottomSheet(File(pickedFile.path));
     }
   }
 
-  void _showPaperSizeDialog(File imageFile) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        // ColorScheme col = Theme.of(context).colorScheme;
-        return AlertDialog(
-         
-        
-          
-          
-          content: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: PaperSizeSelection(
-              onPaperSizeSelected: (String paperSize, String orientation) {
-                _cropImage(imageFile, paperSize, orientation,context);
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
+  void _showPaperSizeBottomSheet(File imageFile) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true, // To allow full height and avoid clipping
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: PaperSizeSelection(
+          onPaperSizeSelected: (String paperSize, String orientation) {
+            _cropImage(imageFile, paperSize, orientation, context);
+          },
+        ),
+      );
+    },
+  );
+}
   Future<void> _cropImage(
       File imageFile, String paperSize, String orientation,BuildContext context) async {
         ColorScheme col = Theme.of(context).colorScheme;
@@ -133,72 +131,3 @@ class _cropState extends State<crop> {
   }
 }
 
-class PaperSizeSelection extends StatefulWidget {
-  final Function(String, String) onPaperSizeSelected;
-
-  PaperSizeSelection({required this.onPaperSizeSelected});
-
-  @override
-  _PaperSizeSelectionState createState() => _PaperSizeSelectionState();
-}
-
-class _PaperSizeSelectionState extends State<PaperSizeSelection> {
-  String _selectedPaperSize = 'A4';
-  String _selectedOrientation = 'Portrait';
-
-  final List<String> paperSizes = ['A1','A2','A3','A4', 'A5',];
-  final List<String> orientations = ['Portrait', 'Landscape'];
-
-  @override
-  Widget build(BuildContext context) {
-    // ColorScheme col = Theme.of(context).colorScheme;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text('Paper Size'),
-        SizedBox(height: 10,),
-        ToggleButtons(
-          borderRadius: BorderRadius.circular(10),
-          
-          isSelected: paperSizes.map((size) => size == _selectedPaperSize).toList(),
-          onPressed: (int index) {
-            setState(() {
-              _selectedPaperSize = paperSizes[index];
-            });
-          },
-          children: paperSizes.map((size) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Text(size),
-          )).toList(),
-        ),
-        SizedBox(height: 20),
-        Text('Orientation'),
-        SizedBox(height: 10,),
-        ToggleButtons(
-          borderRadius: BorderRadius.circular(10),
-          isSelected: orientations.map((orientation) => orientation == _selectedOrientation).toList(),
-          onPressed: (int index) {
-            setState(() {
-              _selectedOrientation = orientations[index];
-            });
-          },
-          children: orientations.map((orientation) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Text(orientation),
-          )).toList(),
-        ),
-        SizedBox(height: 40),
-        SizedBox(
-          width: 120,
-          child: FilledButton(
-            onPressed: () {
-              widget.onPaperSizeSelected(_selectedPaperSize, _selectedOrientation);
-              Navigator.of(context).pop();
-            },
-            child: Text('OK'),
-          ),
-        ),
-      ],
-    );
-  }
-}
