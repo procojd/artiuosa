@@ -3,15 +3,14 @@ import 'dart:ui';
 import 'package:animate_do/animate_do.dart';
 import 'package:artiuosa/controller/controller.dart';
 import 'package:artiuosa/features/screens/filters.dart';
+import 'package:artiuosa/logic/gridsaver.dart';
 // import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart' as cp;
 import 'package:get/get.dart';
 
-void bot_sheet(BuildContext context) {
+void bot_sheet(BuildContext context, GlobalKey globalKey) {
   // double _opacity = 1.0;
   // Color _selectedColor = Colors.black;
   // bool _showOpacitySlider = false;
@@ -27,17 +26,18 @@ void bot_sheet(BuildContext context) {
 
   showModalBottomSheet(
     isDismissible: false,
-    scrollControlDisabledMaxHeightRatio: 0.7,
-    showDragHandle: true,
+    scrollControlDisabledMaxHeightRatio: 0.8,
+    clipBehavior: Clip.hardEdge,
+    
     context: context,
     builder: (context) {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return Obx(() {
             return SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
+              
               child: Padding(
-                padding: const EdgeInsets.all(14.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -49,7 +49,7 @@ void bot_sheet(BuildContext context) {
                               ac.bottomsheet.value = !ac.bottomsheet.value;
                               Navigator.pop(context);
                             },
-                            icon: Icon(Icons.done_rounded))
+                            icon: Icon(Icons.done_rounded,size: 30,))
                       ],
                     ),
                     Padding(
@@ -61,7 +61,7 @@ void bot_sheet(BuildContext context) {
                       ),
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: ['S', 'M', 'L', 'XL']
                           .map((e) => Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -97,6 +97,7 @@ void bot_sheet(BuildContext context) {
                                 onPressed: () {
                                   ac.diagonalLines.value =
                                       !ac.diagonalLines.value;
+                                  ac.storeDiagonalLines(ac.diagonalLines.value);
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -119,7 +120,7 @@ void bot_sheet(BuildContext context) {
                                   ac.squareGrid.value = !ac.squareGrid.value;
                                 },
                                 child: Padding(
-                                  padding: const EdgeInsets.all(20.0),
+                                  padding: const EdgeInsets.all(10.0),
                                   child: Text('Square lines'),
                                 ),
                               ),
@@ -166,7 +167,9 @@ void bot_sheet(BuildContext context) {
                     ),
                     Divider(),
                     ListTile(
-                        onTap: () {},
+                        onTap: () {
+                          _showFrostedGlassDialog1(context,ac.paperWidth.value);
+                        },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
@@ -174,7 +177,7 @@ void bot_sheet(BuildContext context) {
                           'Line distance',
                           style: bottomtext(),
                         ),
-                        subtitle: Text('25mm'),
+                        subtitle: Text('${ac.lineDistance}mm'),
                         trailing: IconButton(
                             padding: EdgeInsets.zero,
                             onPressed: () {
@@ -185,49 +188,7 @@ void bot_sheet(BuildContext context) {
                     SizedBox(
                       height: 5,
                     ),
-                    // Padding(
-                    //   padding: const EdgeInsets.only(left: 8.0, bottom: 8),
-                    //   child: Text('Grid type',
-                    //       style: TextStyle(
-                    //         fontSize: 22,
-                    //         fontWeight: FontWeight.bold,
-                    //       )),
-                    // ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: Row(
-                    //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //     children: [
-                    //       Expanded(
-                    //         child: FilledButton.tonal(
-                    //           style: FilledButton.styleFrom(
-                    //               side:
-                    //                   BorderSide(color: col.primary, width: 1)),
-                    //           onPressed: () {},
-                    //           child: Padding(
-                    //             padding: const EdgeInsets.all(20.0),
-                    //             child: Text('Golden ratio'),
-                    //           ),
-                    //         ),
-                    //       ),
-                    //       SizedBox(
-                    //         width: 5,
-                    //       ),
-                    //       Expanded(
-                    //         child: FilledButton.tonal(
-                    //           style: FilledButton.styleFrom(
-                    //               side:
-                    //                   BorderSide(color: col.primary, width: 1)),
-                    //           onPressed: () {},
-                    //           child: Padding(
-                    //             padding: const EdgeInsets.all(20.0),
-                    //             child: Text('Square Grid'),
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
+                  
                     // Divider(),
                     ListTile(
                       onTap: () {
@@ -253,6 +214,10 @@ void bot_sheet(BuildContext context) {
                     ),
                     Divider(),
                     ListTile(
+                      onTap: () async {
+                        await GridSaver().saveImageWithGrid(globalKey);
+                        _showImageSavedDialog(context);
+                      },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
                       ),
@@ -272,6 +237,153 @@ void bot_sheet(BuildContext context) {
     },
   );
 }
+
+void _showImageSavedDialog(BuildContext context) {
+  ColorScheme col = Theme.of(context).colorScheme;
+
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent dismissing by tapping outside
+    builder: (context) => Dialog(
+      backgroundColor: Colors.transparent,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Frosted glass effect
+          ClipRRect(
+            borderRadius: BorderRadius.circular(25),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+              child: Container(
+                width: double.infinity,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: col.background.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                  ),
+                ),
+                padding: EdgeInsets.all(25),
+                child: Center(
+                  child: Text(
+                    'Image saved to gallery.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                      color: col.onBackground,
+                    ),
+                    
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  // Auto-dismiss the dialog after 1 second with a fade effect
+  Future.delayed(Duration(seconds: 1), () {
+    Navigator.of(context).pop();
+  });
+}
+
+void _showFrostedGlassDialog1(BuildContext context, double imageSize) {
+  ColorScheme col = Theme.of(context).colorScheme;
+  final TextEditingController _controller = TextEditingController();
+  final controller ac = Get.put(controller());
+  String? errorMessage;
+
+  showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Stack(
+          children: [
+            // Frosted glass effect
+            ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: col.background.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                    ),
+                  ),
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        autofocus: true,
+                        controller: _controller,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Enter value in mm ',
+                          labelStyle: TextStyle(
+                              color: col.onBackground.withOpacity(0.5)),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide(color: col.onBackground),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide(color: col.primary),
+                          ),
+                          errorText: errorMessage, // Display error message
+                        ),
+                        style: TextStyle(color: col.onBackground),
+                      ),
+                      SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(color: col.primary),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          FilledButton.tonal(
+                            onPressed: () {
+                              int? value = int.tryParse(_controller.text);
+                              if (value != null && value >= 8 && value <= imageSize / 2) {
+                                ac.lineDistance.value = value;
+                                ac.storeLineDistance(ac.lineDistance.value);
+                                Navigator.of(context).pop();
+                              } else {
+                                // Set the error message if the value is not within the allowed range
+                                setState(() {
+                                  errorMessage = 'Please enter a value between 8 and ${imageSize / 2} mm';
+                                });
+                              }
+                            },
+                            child: Text('OK'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 
 void _showFrostedGlassDialog(BuildContext context) {
   ColorScheme col = Theme.of(context).colorScheme;
@@ -316,15 +428,14 @@ void _showFrostedGlassDialog(BuildContext context) {
                     FadeIn(
                       delay: Durations.medium1,
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.asset('assets/images/mm.png')),
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.asset('assets/images/mm.png')),
                     ),
                     SizedBox(height: 24),
                     FilledButton.tonal(
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      
                       child: Text('OK'),
                     ),
                   ],

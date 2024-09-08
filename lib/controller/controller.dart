@@ -16,15 +16,20 @@ class controller extends GetxController {
   var strokeWidth = 0.3.obs;
   var diagonalLines = false.obs;
   var color = '0xFFFFFFFF'.obs;
-  var lineDistance = 25.0.obs;
+  var lineDistance = 25.obs;
   var squareGrid = true.obs;
+  var labels = false.obs;
 
   var selectedFile = Rx<File?>(null);
   var filteredFile = Rx<File?>(null);
   var imagewidth = Rx<double?>(null);
   var imageheight = Rx<double?>(null);
+  var tempwidth = Rx<double?>(null);
+  var tempheight = Rx<double?>(null);
   var paperHeight = 297.0.obs; // A4 paper height in mm
   var paperWidth = 210.0.obs;
+
+  var onboarding_done = false.obs;
 
   // final String _imagePathKey = 'image_path';
   final String imageWidthKey = 'image_width';
@@ -37,59 +42,81 @@ class controller extends GetxController {
     loadPreferences();
   }
 
+  Future<void> onboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    onboarding_done.value = prefs.getBool('onboarding') ?? false;
+  }
+
+  Future<void> setonboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding', true);
+  }
+
+  Future<void> getfilteredfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    final selectedFilePath = prefs.getString('selectedFile');
+    if (selectedFilePath != null) {
+      selectedFile.value = File(selectedFilePath);
+      print('selectedFile: ${selectedFile.value?.path}');
+    } else {
+      print('selectedFile: null');
+    }
+  }
+
   Future<void> loadPreferences() async {
-  final prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
-  // Retrieve the values, set default if null
-  strokeWidth.value = prefs.getDouble('strokeWidth') ?? 1.0;
-  print('strokeWidth: ${strokeWidth.value}');
+    // Retrieve the values, set default if null
+    strokeWidth.value = prefs.getDouble('strokeWidth') ?? 1.0;
+    print('strokeWidth: ${strokeWidth.value}');
 
-  diagonalLines.value = prefs.getBool('diagonalLines') ?? false;
-  print('diagonalLines: ${diagonalLines.value}');
+    diagonalLines.value = prefs.getBool('diagonalLines') ?? false;
+    print('diagonalLines: ${diagonalLines.value}');
 
-  color.value = prefs.getString('color') ?? '0xFFFFFFFF';
-  print('color: ${color.value}');
+    color.value = prefs.getString('color') ?? '0xFFFFFFFF';
+    print('color: ${color.value}');
 
-  lineDistance.value = prefs.getDouble('lineDistance') ?? 25.0;
-  print('lineDistance: ${lineDistance.value}');
+    lineDistance.value = prefs.getInt('lineDistance') ?? 25;
+    print('lineDistance: ${lineDistance.value}');
 
-  squareGrid.value = prefs.getBool('squareGrid') ?? true;
-  print('squareGrid: ${squareGrid.value}');
+    squareGrid.value = prefs.getBool('squareGrid') ?? true;
+    labels.value = prefs.getBool('labels') ?? false;
+    print('squareGrid: ${squareGrid.value}');
 
-  paperHeight.value = prefs.getDouble('paperHeight') ?? 297.0;
-  print('paperHeight: ${paperHeight.value}');
+    paperHeight.value = prefs.getDouble('paperHeight') ?? 297.0;
+    print('paperHeight: ${paperHeight.value}');
 
-  paperWidth.value = prefs.getDouble('paperWidth') ?? 210.0;
-  print('paperWidth: ${paperWidth.value}');
+    paperWidth.value = prefs.getDouble('paperWidth') ?? 210.0;
+    print('paperWidth: ${paperWidth.value}');
 
-  // If imageWidth and imageHeight are not set, assign some default values
-  imagewidth.value = prefs.getDouble('imageWidth') ?? 100.0; // default value
-  print('imageWidth: ${imagewidth.value}');
+    // If imageWidth and imageHeight are not set, assign some default values
+    imagewidth.value = prefs.getDouble('imageWidth') ?? 100.0; // default value
+    print('imageWidth: ${imagewidth.value}');
 
-  imageheight.value = prefs.getDouble('imageHeight') ?? 100.0; // default value
-  print('imageHeight: ${imageheight.value}');
+    imageheight.value =
+        prefs.getDouble('imageHeight') ?? 100.0; // default value
+    print('imageHeight: ${imageheight.value}');
 
-  // Handle files (You can adjust this part based on how you save/load files)
-  final selectedFilePath = prefs.getString('selectedFile');
-  if (selectedFilePath != null) {
-    selectedFile.value = File(selectedFilePath);
-    print('selectedFile: ${selectedFile.value?.path}');
-  } else {
-    print('selectedFile: null');
+    // Handle files (You can adjust this part based on how you save/load files)
+    final selectedFilePath = prefs.getString('selectedFile');
+    if (selectedFilePath != null) {
+      selectedFile.value = File(selectedFilePath);
+      print('selectedFile: ${selectedFile.value?.path}');
+    } else {
+      print('selectedFile: null');
+    }
+
+    final filteredFilePath = prefs.getString('filteredFile');
+    if (filteredFilePath != null) {
+      filteredFile.value = File(filteredFilePath);
+      print('filteredFile: ${filteredFile.value?.path}');
+    } else {
+      print('filteredFile: null');
+    }
   }
-
-  final filteredFilePath = prefs.getString('filteredFile');
-  if (filteredFilePath != null) {
-    filteredFile.value = File(filteredFilePath);
-    print('filteredFile: ${filteredFile.value?.path}');
-  } else {
-    print('filteredFile: null');
-  }
-}
-
 
   RxList<Color> selectedColors = [Colors.red, Colors.white].obs;
-  RxList<PrismacolorPencil> availablePencils = [
+ RxList<PrismacolorPencil> availablePencils = [
     PrismacolorPencil(
       name: 'Red',
       code: 'PC923',
@@ -180,7 +207,7 @@ class controller extends GetxController {
 
   Future<void> storeDiagonalLines(bool diagonalLines) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('diagonal_lines', diagonalLines);
+    await prefs.setBool('diagonalLines', diagonalLines);
   }
 
   Future<void> storeLabels(bool labels) async {
@@ -198,14 +225,21 @@ class controller extends GetxController {
     await prefs.setString('color', color);
   }
 
-  Future<void> storeLineDistance(double lineDistance) async {
+  Future<void> storeLineDistance(int lineDistance) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('line_distance', lineDistance);
+    await prefs.setInt('lineDistance', lineDistance);
   }
 
   Future<void> storeGoldenRatio(bool goldenRatio) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('golden_ratio', goldenRatio);
+  }
+
+  Future<void> storefilteredfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (filteredFile.value != null) {
+      prefs.setString('filteredFile', filteredFile.value!.path);
+    }
   }
 
   Future<void> storeSquareGrid(bool squareGrid) async {
@@ -279,6 +313,8 @@ class controller extends GetxController {
         return orientation == 'Portrait'
             ? CropAspectRatio(ratioX: 148, ratioY: 210)
             : CropAspectRatio(ratioX: 210, ratioY: 148);
+      case 'custom':
+        return  CropAspectRatio(ratioX: tempwidth.value!*10 , ratioY: tempheight.value!*10);
       default:
         return CropAspectRatio(ratioX: 1, ratioY: 1);
     }

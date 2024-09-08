@@ -1,5 +1,5 @@
 class PrismacolorPencil {
-  final String name;
+ late String name;
   final String code;
   late  String hex;
   late  List<int> rgb;

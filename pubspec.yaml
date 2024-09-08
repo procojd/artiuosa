@@ -17,9 +17,11 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   get: ^4.6.6
   image_cropper: ^7.1.0
+  image_gallery_saver: ^2.0.3
   image_picker: ^1.1.2
   model_viewer_plus: ^1.7.2
   path_provider: ^2.1.4
+  permission_handler: ^11.3.1
   screenshot: ^2.5.0
   shared_preferences: ^2.2.3
 

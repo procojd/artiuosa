@@ -1,163 +1,12 @@
-// import 'dart:io';
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:image/image.dart' as img;
-// import 'package:path_provider/path_provider.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-
-// class FilterPage extends StatefulWidget {
-//   final File image;
-//   final Function(File) onFilterApplied;
-
-//   const FilterPage({Key? key, required this.image, required this.onFilterApplied}) : super(key: key);
-
-//   @override
-//   _FilterPageState createState() => _FilterPageState();
-// }
-
-// class _FilterPageState extends State<FilterPage> {
-//   File? _filteredImage;
-//   File? _originalImage;
-//   final List<String> _filters = ['None', 'Grayscale', 'Sepia', 'Invert'];
-//   String _selectedFilter = 'None';
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _originalImage = widget.image;
-//     _filteredImage = widget.image;
-//     _applyFilter(_selectedFilter);
-//   }
-
-//   Future<void> _applyFilter(String filter) async {
-//     // Ensure that the original image is not null
-//     if (_originalImage == null) return;
-
-//     // Decode the original image
-//     final img.Image originalImage = img.decodeImage(_originalImage!.readAsBytesSync())!;
-//     img.Image filteredImage;
-
-//     // Apply the selected filter
-//     switch (filter) {
-//       case 'Grayscale':
-//         filteredImage = img.grayscale(originalImage);
-//         break;
-//       case 'Sepia':
-//         filteredImage = img.sepia(originalImage);
-//         break;
-//       case 'Invert':
-//         filteredImage = img.invert(originalImage);
-//         break;
-//       default:
-//         filteredImage = originalImage;
-//     }
-
-//     // Save the filtered image to the app's documents directory
-//     final directory = await getApplicationDocumentsDirectory();
-//     final filteredImagePath = '${directory.path}/filtered_image.png';
-//     final file = File(filteredImagePath);
-
-//     // Check if the file exists and write the image data
-//     if (await file.exists()) {
-//       await file.delete();
-//     }
-//     await file.writeAsBytes(img.encodePng(filteredImage));
-
-//     setState(() {
-//       _filteredImage = file;
-//     });
-
-//     // Notify the parent widget that the filter has been applied
-//     widget.onFilterApplied(_filteredImage!);
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Apply Filters'),
-//         centerTitle: true,
-//       ),
-//       body: Column(
-//         children: [
-//           Expanded(
-//             child: Center(
-//               child: _filteredImage != null
-//                   ? Image.file(_filteredImage!)
-//                   : CircularProgressIndicator(),
-//             ),
-//           ),
-//           Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: SingleChildScrollView(
-//               scrollDirection: Axis.horizontal,
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-//                 children: _filters.map((filter) {
-//                   return GestureDetector(
-//                     onTap: () {
-//                       setState(() {
-//                         _selectedFilter = filter;
-//                         _applyFilter(filter);
-//                       });
-//                     },
-//                     child: Container(
-//                       margin: EdgeInsets.symmetric(horizontal: 10),
-//                       padding: EdgeInsets.all(12),
-//                       decoration: BoxDecoration(
-//                         color: filter == _selectedFilter ? Colors.blue : Colors.grey[200],
-//                         borderRadius: BorderRadius.circular(10),
-//                         boxShadow: [
-//                           BoxShadow(
-//                             color: Colors.black.withOpacity(0.2),
-//                             blurRadius: 5,
-//                             offset: Offset(0, 3),
-//                           ),
-//                         ],
-//                       ),
-//                       child: Text(
-//                         filter,
-//                         style: TextStyle(
-//                           color: filter == _selectedFilter ? Colors.white : Colors.black,
-//                           fontWeight: filter == _selectedFilter ? FontWeight.bold : FontWeight.normal,
-//                         ),
-//                       ),
-//                     ),
-//                   );
-//                 }).toList(),
-//               ),
-//             ),
-//           ),
-//           Padding(
-//             padding: const EdgeInsets.all(16.0),
-//             child: ElevatedButton(
-//               onPressed: () async {
-//                 if (_filteredImage != null) {
-//                   SharedPreferences prefs = await SharedPreferences.getInstance();
-//                   await prefs.setString('filtered_image_path', _filteredImage!.path);
-//                   Get.back();
-//                 }
-//               },
-//               child: Text('Apply Filter'),
-//               style: ElevatedButton.styleFrom(
-
-//                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-//                 textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
 import 'dart:io';
-
+import 'package:path/path.dart' as path;
 import 'package:artiuosa/controller/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 @immutable
 class ExampleImageFilterSelection extends StatefulWidget {
@@ -189,7 +38,67 @@ class _ExampleImageFilterSelectionState
     _filterMode.value = filter;
   }
 
+  // Future<void> _saveFilteredImage() async {
+  //   if (await Permission.storage.request().isGranted) {
+  //     setState(() {
+  //       isloading = true;
+  //     });
+
+  //     try {
+  //       // Decode the original image from the selected file
+  //       final originalImage =
+  //           img.decodeImage(ac.selectedFile.value!.readAsBytesSync())!;
+
+  //       // Apply the filter to the image
+  //       final filteredImage =
+  //           _applyImageFilter(originalImage, _filterMode.value);
+  //       print(_filterMode.value);
+
+  //       // Get the external storage directory
+  //       final directory = await getExternalStorageDirectory();
+
+  //       // Ensure the directory is not null
+  //       if (directory == null) {
+  //         throw Exception('Could not find external storage directory');
+  //       }
+
+  //       // Define the path for the filtered image, with proper path separator
+  //       final filteredImagePath = path.join(
+  //           directory.path, 'filtered_image_${_filterMode.value}.png');
+
+  //       // Create a File object for the filtered image
+  //       final filteredFile = File(filteredImagePath);
+
+  //       // Save the filtered image as a PNG file
+  //       await filteredFile.writeAsBytes(img.encodePng(filteredImage));
+
+  //       // Update the observable variable with the new filtered image file
+  //       ac.filteredFile.value = filteredFile;
+  //       ac.storefilteredfile();
+  //       ac.getfilteredfile();
+
+  //       // Show a success message
+  //       setState(() {
+  //         isloading = false;
+  //       });
+
+  //       Navigator.pop(context);
+
+  //       // Delete the file after saving it to the observable variable
+  //       // await filteredFile.delete();
+  //     } catch (e) {
+  //       // Handle any errors
+  //       print('Error: $e');
+  //       Get.snackbar('Error', 'Failed to save filtered image: $e');
+  //     }
+  //   } else {
+  //     // Handle the case where permission is not granted
+  //     Get.snackbar('Permission Denied',
+  //         'Storage permission is required to save the image.');
+  //   }
+  // }
   Future<void> _saveFilteredImage() async {
+  if (await Permission.storage.request().isGranted|| await Permission.photos.request().isGranted) {
     setState(() {
       isloading = true;
     });
@@ -200,47 +109,57 @@ class _ExampleImageFilterSelectionState
           img.decodeImage(ac.selectedFile.value!.readAsBytesSync())!;
 
       // Apply the filter to the image
-      final filteredImage = _applyImageFilter(originalImage, _filterMode.value);
+      final filteredImage =
+          _applyImageFilter(originalImage, _filterMode.value);
       print(_filterMode.value);
 
-      // Get the application documents directory
-      // final directory = await getApplicationDocumentsDirectory();
-      var directory1;
-      {
-        directory1 = "/storage/emulated/0/Download/";
+      // Get the external storage directory
+      final directory = await getExternalStorageDirectory();
 
-        var dirDownloadExists = await Directory(directory1).exists();
-        if (dirDownloadExists) {
-          directory1 = "/storage/emulated/0/Download/";
-        } else {
-          directory1 = "/storage/emulated/0/Downloads/";
-        }
+      // Ensure the directory is not null
+      if (directory == null) {
+        throw Exception('Could not find external storage directory');
       }
 
-      // Define the path for the filtered image
-      final filteredImagePath =
-          '${directory1}filtered_image_${_filterMode.value}.png';
+      // Define the path for the filtered image, with proper path separator
+      final filteredImagePath = path.join(
+          directory.path, 'filtered_image_${_filterMode.value}.png');
 
       // Create a File object for the filtered image
       final filteredFile = File(filteredImagePath);
+
+      // If the file already exists, delete it before saving the new one
+      if (await filteredFile.exists()) {
+        await filteredFile.delete();
+      }
 
       // Save the filtered image as a PNG file
       await filteredFile.writeAsBytes(img.encodePng(filteredImage));
 
       // Update the observable variable with the new filtered image file
-      print('jaknfnadnf,aa');
-      ac.selectedFile.value = filteredFile;
-      isloading = false;
+      ac.filteredFile.value = filteredFile;
+      ac.storefilteredfile();
+      ac.getfilteredfile();
 
       // Show a success message
-      await Future.delayed(const Duration(milliseconds: 1500));
+      setState(() {
+        isloading = false;
+      });
 
       Navigator.pop(context);
+
     } catch (e) {
       // Handle any errors
+      print('Error: $e');
       Get.snackbar('Error', 'Failed to save filtered image: $e');
     }
+  } else {
+    // Handle the case where permission is not granted
+    Get.snackbar('Permission Denied',
+        'Storage permission is required to save the image.');
   }
+}
+
 
   img.Image _applyImageFilter(img.Image originalImage, String filter) {
     switch (filter) {
@@ -310,21 +229,22 @@ class _ExampleImageFilterSelectionState
     );
   }
 
- Widget _buildPhotoWithFilter() {
-  return ValueListenableBuilder(
-    valueListenable: _filterMode,
-    builder: (context, filter, child) {
-      return ColorFiltered(
-        colorFilter: _getColorFilter(filter),
-        child: Image.file(
-          ac.selectedFile.value!,
-          fit: BoxFit.fitWidth,
-          filterQuality: FilterQuality.high,
-        ),
-      );
-    },
-  );
-}
+  Widget _buildPhotoWithFilter() {
+    return ValueListenableBuilder(
+      valueListenable: _filterMode,
+      builder: (context, filter, child) {
+        return ColorFiltered(
+          colorFilter: _getColorFilter(filter),
+          child: Image.file(
+            ac.selectedFile.value!,
+            fit: BoxFit.fitWidth,
+            filterQuality: FilterQuality.high,
+          ),
+        );
+      },
+    );
+  }
+
   ColorFilter _getColorFilter(String filter) {
     switch (filter) {
       case 'Negative':

@@ -13,10 +13,9 @@ class ColorMixScreen extends StatefulWidget {
 }
 
 class _ColorMixScreenState extends State<ColorMixScreen> {
-  
   final controller ac = Get.put(controller());
-  
-  TextEditingController tc =TextEditingController();
+
+  TextEditingController tc = TextEditingController();
 
   int selectedColorIndex = 0;
   Color mixedColor = Color.fromARGB(255, 180, 180, 180);
@@ -33,16 +32,16 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
               pickerColor: selectedColor,
               hexInputBar: true,
               enableAlpha: false,
-              hexInputController:tc,
-
+              hexInputController: tc,
               labelTypes: [ColorLabelType.rgb],
-              
               onColorChanged: (color) {
+                ac.availablePencils[index].name = 'picked';
                 print(color.red);
                 print(color.toHexString());
-                
+
                 setState(() {
                   ac.availablePencils[index].hex = tc.text;
+
                   print(color.red);
                   ac.availablePencils[index].rgb = [
                     color.red,
@@ -102,12 +101,6 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
       ),
       appBar: AppBar(
         centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(Icons.person_outline),
-          )
-        ],
         title: Text('Artiuosa'),
       ),
       body: Padding(
@@ -136,9 +129,12 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
                   },
                   child: Text('Palette'),
                 ),
-                IconButton.filled(onPressed: (){
-                  showSavedColors(context);
-                }, icon: Icon(Icons.archive), ),
+                IconButton.filled(
+                  onPressed: () {
+                    showSavedColors(context);
+                  },
+                  icon: Icon(Icons.archive),
+                ),
                 Spacer(),
                 FilledButton.tonal(
                   onPressed: _mixColors,
@@ -173,52 +169,54 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
                     return Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       child: ListTile(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(40)),
-                        tileColor: col.secondaryContainer,
-                        leading: Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            gradient: RadialGradient(
-                              colors: [
-                                ac.availablePencils[index].hex.toColor()!,
-                                Colors.black,
-                              ],
-                              center:
-                                  Alignment(0.0, 0.2), // Center of the gradient
-                              radius: 1.5, // Radius of the gradient
-                              stops: [
-                                0.28,
-                                1.0
-                              ], // Where the colors should stop
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(40)),
+                          tileColor: col.secondaryContainer,
+                          leading: Container(
+                            width: 45,
+                            height: 45,
+                            decoration: BoxDecoration(
+                              gradient: RadialGradient(
+                                colors: [
+                                  ac.availablePencils[index].hex.toColor()!,
+                                  Colors.black,
+                                ],
+                                center: Alignment(
+                                    0.0, 0.2), // Center of the gradient
+                                radius: 1.5, // Radius of the gradient
+                                stops: [
+                                  0.28,
+                                  1.0
+                                ], // Where the colors should stop
+                              ),
+                              shape: BoxShape.circle,
+                              color: ac.availablePencils[index].hex.toColor()!,
                             ),
-                            shape: BoxShape.circle,
-                            color: ac.availablePencils[index].hex.toColor()!,
                           ),
-                        ),
-                        title: Text(
-                          'Hex Code',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          '${ac.availablePencils[index].hex}',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        trailing: IconButton(
-                            icon: Icon(Icons.cancel_rounded),
-                            onPressed: () {
-                              ac.removecm(index);
-                              setState(() {});
-                            }),
-                        onTap: () => _selectColor(index),
-                      ),
+                          title: Text(
+                            'Hex Code',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            '${ac.availablePencils[index].hex}',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          trailing: IconButton(
+                              icon: Icon(Icons.cancel_rounded),
+                              onPressed: () {
+                                ac.removecm(index);
+                                setState(() {});
+                              }),
+                          onTap: () async{
+                            
+                           _selectColor(index);
+                            
+                          }),
                     );
                   },
                 );
               }),
             ),
-            
             FilledButton.tonal(
                 onPressed: () {
                   // List<PrismacolorPencil> pencils = [
@@ -256,7 +254,6 @@ class _ColorMixScreenState extends State<ColorMixScreen> {
 }
 
 Future<void> showPencilDialog(BuildContext context) async {
-
   final controller ac = Get.put(controller());
   final Map<String, int> _indexMap = {};
 

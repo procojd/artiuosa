@@ -1,6 +1,9 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:artiuosa/controller/controller.dart';
 import 'package:artiuosa/features/homescreen/homescreen.dart';
+import 'package:artiuosa/features/onboarding/onboarding.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class splash_screen extends StatefulWidget {
   const splash_screen({super.key});
@@ -10,16 +13,17 @@ class splash_screen extends StatefulWidget {
 }
 
 class _splash_screenState extends State<splash_screen> {
- 
+  controller ac = Get.put(controller());
   @override
   void initState() {
     super.initState();
-    
+    ac.onboarding();
+
     // Navigate to the next page after 2 seconds
     Future.delayed(Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) =>ac.onboarding_done.value? HomeScreen():OnboardingScreen()),
       );
     });
   }
@@ -28,9 +32,14 @@ class _splash_screenState extends State<splash_screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 255, 253, 254),
-      body: Center(child: ZoomIn(
-        
-        child: FadeIn(child: Image.asset('assets/images/artiuosa_s.png',scale: 5,))),),
+      body: Center(
+        child: ZoomIn(
+            child: FadeIn(
+                child: Image.asset(
+          'assets/images/artiuosa_s.png',
+          scale: 5,
+        ))),
+      ),
     );
   }
 }
