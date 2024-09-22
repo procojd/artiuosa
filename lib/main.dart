@@ -22,6 +22,10 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent, // Set transparent
+
+    ));
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: splash_screen(),

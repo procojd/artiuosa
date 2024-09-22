@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:artiuosa/ui/drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -59,28 +61,30 @@ class _Viewer3dState extends State<Viewer3d> {
   //     print('Failed to get download URL: $e');
   //   }
   // }
-Future<void> _saveScreenshot() async {
-  // Request storage permission
-  if (await Permission.storage.request().isGranted||await Permission.photos.request().isGranted) {
-    final Uint8List? image = await _screenshotController.capture();
+  Future<void> _saveScreenshot() async {
+    // Request storage permission
+    if (await Permission.storage.request().isGranted ||
+        await Permission.photos.request().isGranted) {
+      final Uint8List? image = await _screenshotController.capture();
 
-    if (image != null) {
-      // Save the image to the gallery
-      final result = await ImageGallerySaver.saveImage(image, quality: 100, name: "screenshot");
+      if (image != null) {
+        // Save the image to the gallery
+        final result = await ImageGallerySaver.saveImage(image,
+            quality: 100, name: "screenshot");
 
-      if (result['isSuccess']) {
-        _showImageSavedDialog(context);
-      } else {
-        print('Error saving image to gallery');
-        // Handle error if needed
+        if (result['isSuccess']) {
+          _showImageSavedDialog(context);
+        } else {
+          print('Error saving image to gallery');
+          // Handle error if needed
+        }
       }
+    } else {
+      // Handle the case where permission is not granted
+      print('Storage permission not granted');
+      // You might want to show a snackbar or dialog to inform the user
     }
-  } else {
-    // Handle the case where permission is not granted
-    print('Storage permission not granted');
-    // You might want to show a snackbar or dialog to inform the user
   }
-}
   // Future<void> _saveScreenshot() async {
   //   final Uint8List? image = await _screenshotController.capture();
   //   bool dirDownloadExists = true;
@@ -212,32 +216,41 @@ Future<void> _saveScreenshot() async {
                 // ),
                 // Text('Select Model: '),
                 //
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: SegmentedButton<String>(
-                      segments: _models.map((String value) {
-                        return ButtonSegment<String>(
-                          value: value,
-                          label: Text(_modelMap[value]!),
-                        );
-                      }).toList(),
-                      selected: {_selectedModel},
-                      onSelectionChanged: (Set<String> newSelection) {
-                        setState(() {
-                          // Since only one selection is allowed, we take the first element
-                          _selectedModel = newSelection.first;
-                        });
-                      },
+                FadeIn(
+                  delay: Durations.medium2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<String>(
+                        segments: _models.map((String value) {
+                          return ButtonSegment<String>(
+                            value: value,
+                            label: Text(_modelMap[value]!),
+                          );
+                        }).toList(),
+                        selected: {_selectedModel},
+                        onSelectionChanged: (Set<String> newSelection) {
+                          setState(() {
+                            // Since only one selection is allowed, we take the first element
+                            _selectedModel = newSelection.first;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(height: 10),
 
-                FilledButton(
-                  onPressed: _saveScreenshot,
-                  child: Text('Save Posture'),
+                FadeIn(
+                  delay: Durations.medium3,
+                  child: FilledButton(
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      _saveScreenshot();
+                    },
+                    child: Text('Save Posture'),
+                  ),
                 ),
                 SizedBox(height: 10),
               ],

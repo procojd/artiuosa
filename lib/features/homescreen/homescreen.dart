@@ -1,18 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'dart:ui';
 
 import 'package:animate_do/animate_do.dart';
 import 'package:artiuosa/controller/controller.dart';
-import 'package:artiuosa/ui/drawer.dart';
-import 'package:artiuosa/ui/grid_modalsheet.dart';
 import 'package:artiuosa/logic/gridpainter.dart';
 import 'package:artiuosa/logic/papersize.dart';
+import 'package:artiuosa/ui/drawer.dart';
+import 'package:artiuosa/ui/grid_modalsheet.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +38,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final height = MediaQuery.sizeOf(context).height;
+    final screenratio = height * 0.9 / width;
+    // final imageratio = ac.imageheight.value! / ac.imagewidth.value!;
+
+    print('screen ration ${screenratio}');
+    print('image ration ${ac.imageheight.value! / ac.imagewidth.value!}');
+
     ColorScheme col = Theme.of(context).colorScheme;
     return Obx(() {
       return Scaffold(
@@ -53,16 +57,24 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             ac.selectedFile.value != null
                 ? IconButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: _pickImage, icon: Icon(Icons.add))
+                    padding: EdgeInsets.zero,
+                    onPressed: () {
+                      _pickImage();
+                      HapticFeedback.selectionClick();
+                    },
+                    icon: Icon(Icons.add))
                 : SizedBox(),
-            IconButton(padding: EdgeInsets.zero,
+            IconButton(
+                padding: EdgeInsets.zero,
                 onPressed: () {
                   bot_sheet(context, _globalKey);
+                  HapticFeedback.selectionClick();
                 },
                 icon: Icon(Icons.more_vert_rounded)),
-            IconButton(padding: EdgeInsets.zero,
+            IconButton(
+                padding: EdgeInsets.zero,
                 onPressed: () {
+                  HapticFeedback.selectionClick();
                   ac.labels.value = !ac.labels.value;
                   ac.storeLabels(ac.labels.value);
                 },
@@ -75,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: Obx(() {
           return Center(
             child: SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
@@ -82,57 +95,70 @@ class _HomeScreenState extends State<HomeScreen> {
                   ac.selectedFile.value == null
                       ? Text(
                           'No image selected.',
-                          style: TextStyle(color: col.onBackground, fontSize: 16),
+                          style:
+                              TextStyle(color: col.onBackground, fontSize: 16),
                         )
                       : LayoutBuilder(builder: (context, constraints) {
-                        return InteractiveViewer(
-                          minScale: 0.1,
-                          maxScale: 10.0,
-                          child: Container(
-                            width: width,
-                            height: height*0.9,
-                            
-                            child: Center(
-                              child: RepaintBoundary(
-                                key: _globalKey,
-                                child: Stack(
-                                  children: [
-                                    Obx(() {
-                                      return FadeIn(
-                                          child: Image.file(
-                                        ac.filteredFile.value!,
-                                        fit: BoxFit.fitWidth,
-                                      ));
-                                    }),
-                                    Obx(() {
-                                      return FadeIn(
-                                        delay: Durations.medium1,
-                                        child: CustomPaint(
-                                          painter: GridPainter(
-                                            imageWidth:
-                                                (ac.imagewidth.value! *
-                                                        height *
-                                                        0.9) /
-                                                    ac.imageheight.value!,
-                                            imageHeight:
-                                                (ac.imageheight.value! *
-                                                        width) /
-                                                    ac.imagewidth.value!,
-                                            scale: ac.bottomsheet.value,
-                                            width: MediaQuery.sizeOf(context)
-                                                    .width *
-                                                0.003,
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                                  ],
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: InteractiveViewer(
+                              minScale: 0.1,
+                              maxScale: 10.0,
+                              child: Container(
+                                width: width,
+                                height: height * 0.9,
+                                child: Center(
+                                  child: RepaintBoundary(
+                                    key: _globalKey,
+                                    child: Stack(
+                                      children: [
+                                        Obx(() {
+                                          return FadeIn(
+                                              child: Image.file(
+                                                scale: 0.5,
+                                            // scale: 0.5,
+                                            ac.filteredFile.value!,
+                                            // fit: BoxFit.fitWidth,
+                                          ));
+                                        }),
+                                        Obx(() {
+                                          return FadeIn(
+                                            delay: Durations.medium1,
+                                            child: CustomPaint(
+                                              painter: GridPainter(
+                                                //
+                                                imageWidth: (ac.imageheight
+                                                                .value! /
+                                                            ac.imagewidth
+                                                                .value!) >
+                                                        screenratio
+                                                    ? (ac.imagewidth.value! *
+                                                            height *
+                                                            0.9) /
+                                                        ac.imageheight.value!
+                                                    : width,
+                                                
+                                                imageHeight:
+                                                    (ac.imageheight.value! *
+                                                            width) /
+                                                        ac.imagewidth.value!,
+                                                scale: ac.bottomsheet.value,
+                                                width:
+                                                    MediaQuery.sizeOf(context)
+                                                            .width *
+                                                        0.003,
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      }),
+                          );
+                        }),
                   ac.selectedFile.value == null
                       ? SizedBox(height: 20)
                       : SizedBox(),
@@ -186,6 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
       BuildContext context) async {
     ColorScheme col = Theme.of(context).colorScheme;
     final cropAspectRatio = ac.getCropAspectRatio(paperSize, orientation);
+
     CroppedFile? croppedFile = await ImageCropper().cropImage(
       sourcePath: imageFile.path,
       aspectRatio: cropAspectRatio,
@@ -235,6 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     ac.imagewidth.value = imageSize.width;
     ac.imageheight.value = imageSize.height;
+    print('image ration ${ac.imageheight.value! / ac.imagewidth.value!}');
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (ac.selectedFile.value != null) {

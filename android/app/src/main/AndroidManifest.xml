@@ -7,7 +7,7 @@
     <!-- Fallback permissions for devices below Android 13 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <!-- <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/> -->
 
     <!-- Required for Android 10 (API level 29) and above to access files in external storage -->
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>

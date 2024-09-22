@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:artiuosa/model/colormode.dart';
 import 'package:artiuosa/model/savemodel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +41,14 @@ class controller extends GetxController {
   void onInit() {
     super.onInit();
     loadPreferences();
+  }
+
+  ui.Color? tocolor(String hex) {
+    return hex.toColor();
+  }
+
+  String tohex(ui.Color color) {
+    return color.toHexString();
   }
 
   Future<void> onboarding() async {
@@ -116,7 +125,7 @@ class controller extends GetxController {
   }
 
   RxList<Color> selectedColors = [Colors.red, Colors.white].obs;
- RxList<PrismacolorPencil> availablePencils = [
+  RxList<PrismacolorPencil> availablePencils = [
     PrismacolorPencil(
       name: 'Red',
       code: 'PC923',
@@ -314,7 +323,8 @@ class controller extends GetxController {
             ? CropAspectRatio(ratioX: 148, ratioY: 210)
             : CropAspectRatio(ratioX: 210, ratioY: 148);
       case 'custom':
-        return  CropAspectRatio(ratioX: tempwidth.value!*10 , ratioY: tempheight.value!*10);
+        return CropAspectRatio(
+            ratioX: tempwidth.value! * 10, ratioY: tempheight.value! * 10);
       default:
         return CropAspectRatio(ratioX: 1, ratioY: 1);
     }

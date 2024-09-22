@@ -3,6 +3,7 @@ import 'package:artiuosa/controller/controller.dart';
 import 'package:artiuosa/model/colormode.dart';
 import 'package:artiuosa/model/savemodel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 // void showSavedColors(BuildContext context) async {
@@ -123,7 +124,7 @@ import 'package:get/get.dart';
 //                                   padding: const EdgeInsets.symmetric(
 //                                       horizontal: 15.0),
 //                                   child: ListTile(
-                                    
+
 //                                     title: Text(
 //                                       pencil.name,
 //                                       style: TextStyle(
@@ -264,7 +265,6 @@ void showSavedColors(BuildContext context) async {
             return Container(
               child: Column(
                 children: [
-                  
                   Text(
                     'Saved Colors',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -413,6 +413,7 @@ void showSavedColors(BuildContext context) async {
                   selectedcm != null
                       ? FilledButton.tonal(
                           onPressed: () async {
+                            HapticFeedback.lightImpact();
                             setState(() {
                               ac.colorModels.remove(selectedcm);
                             });
@@ -424,7 +425,7 @@ void showSavedColors(BuildContext context) async {
                           child: Text('Delete'),
                         )
                       : SizedBox(),
-                      SizedBox(height: 10),
+                  SizedBox(height: 10),
                 ],
               ),
             );

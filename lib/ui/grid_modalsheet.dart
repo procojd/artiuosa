@@ -7,6 +7,7 @@ import 'package:artiuosa/logic/gridsaver.dart';
 // import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart' as cp;
 import 'package:get/get.dart';
 
@@ -23,7 +24,7 @@ void bot_sheet(BuildContext context, GlobalKey globalKey) {
   };
   ColorScheme col = Theme.of(context).colorScheme;
   final controller ac = Get.put(controller());
-
+bool isColorPickerVisible = false;
   showModalBottomSheet(
     isDismissible: false,
     scrollControlDisabledMaxHeightRatio: 0.8,
@@ -71,6 +72,7 @@ void bot_sheet(BuildContext context, GlobalKey globalKey) {
                                 child: IconButton.filledTonal(
                                     isSelected: mp[e] == ac.strokeWidth.value,
                                     onPressed: () {
+                                      
                                       ac.strokeWidth.value = mp[e];
                                       ac.storeStrokeWidth(ac.strokeWidth.value);
                                     },
@@ -95,6 +97,7 @@ void bot_sheet(BuildContext context, GlobalKey globalKey) {
                                             color: col.primary, width: 1)
                                         : BorderSide.none),
                                 onPressed: () {
+                                  HapticFeedback.selectionClick();
                                   ac.diagonalLines.value =
                                       !ac.diagonalLines.value;
                                   ac.storeDiagonalLines(ac.diagonalLines.value);
@@ -117,6 +120,7 @@ void bot_sheet(BuildContext context, GlobalKey globalKey) {
                                             color: col.primary, width: 1)
                                         : BorderSide.none),
                                 onPressed: () {
+                                  HapticFeedback.selectionClick();
                                   ac.squareGrid.value = !ac.squareGrid.value;
                                 },
                                 child: Padding(
@@ -130,7 +134,43 @@ void bot_sheet(BuildContext context, GlobalKey globalKey) {
                       ),
                     ),
                     Divider(),
+                    // ListTile(
+                    //   title: Text('Color'),
+                    //   trailing: GestureDetector(
+                    //     onTap: () {
+                    //       ac.color.value = ac.color.value;
+                    //     },
+                    //     child: CircleAvatar(
+                    //       backgroundColor:
+                    //           cp.colorFromHex(ac.color.value) ?? Colors.white,
+                    //     ),
+                    //   ),
+                    // ),
+                    // ColorPicker(
+                    //   enableTooltips: true,
+                    //   pickersEnabled: {ColorPickerType.wheel: true},
+                    //   enableOpacity: true,
+                    //   // Use the screenPickerColor as color.
+                    //   color: cp.colorFromHex(ac.color.value) ?? Colors.white,
+                    //   // Update the screenPickerColor using the callback.
+                    //   onColorChanged: (Color color) => setState(() {
+                    //     ac.storeColor(cp.colorToHex(color));
+                    //     ac.color.value = cp.colorToHex(color);
+                    //   }),
+                    //   width: 44,
+                    //   height: 44,
+                    //   borderRadius: 22,
+                    //   // heading: Text(
+                    //   //   'Select color',
+                    //   //   style: Theme.of(context).textTheme.headlineSmall,
+                    //   // ),
+                    //   subheading: Text(
+                    //     'Select color shade',
+                    //     style: Theme.of(context).textTheme.titleMedium,
+                    //   ),
+                    // ),
                     ListTile(
+                      shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       title: Text('Color'),
                       trailing: GestureDetector(
                         onTap: () {
@@ -141,37 +181,47 @@ void bot_sheet(BuildContext context, GlobalKey globalKey) {
                               cp.colorFromHex(ac.color.value) ?? Colors.white,
                         ),
                       ),
+                      onTap: () {
+                        setState(() {
+                          isColorPickerVisible = !isColorPickerVisible; // Toggle visibility
+                        });
+                      },
                     ),
-                    ColorPicker(
-                      enableTooltips: true,
-                      pickersEnabled: {ColorPickerType.wheel: true},
-                      enableOpacity: true,
-                      // Use the screenPickerColor as color.
-                      color: cp.colorFromHex(ac.color.value) ?? Colors.white,
-                      // Update the screenPickerColor using the callback.
-                      onColorChanged: (Color color) => setState(() {
-                        ac.storeColor(cp.colorToHex(color));
-                        ac.color.value = cp.colorToHex(color);
-                      }),
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      // heading: Text(
-                      //   'Select color',
-                      //   style: Theme.of(context).textTheme.headlineSmall,
-                      // ),
-                      subheading: Text(
-                        'Select color shade',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
+                    // AnimatedSwitcher to hide/reveal the ColorPicker
+                    AnimatedSwitcher(
+                      duration: Duration(milliseconds: 700),
+                      switchInCurve: Curves.easeIn,
+                      switchOutCurve: Curves.easeOut,
+                      child: isColorPickerVisible
+                          ? ColorPicker(
+                              enableTooltips: true,
+                              pickersEnabled: {ColorPickerType.wheel: true,
+                              ColorPickerType.custom:true
+                              },
+                              enableOpacity: true,
+                              color: cp.colorFromHex(ac.color.value) ?? Colors.white,
+                              onColorChanged: (Color color) => setState(() {
+                                ac.storeColor(cp.colorToHex(color));
+                                ac.color.value = cp.colorToHex(color);
+                              }),
+                              width: 44,
+                              height: 44,
+                              borderRadius: 22,
+                              subheading: Text(
+                                'Select color shade',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            )
+                          : SizedBox.shrink(), // Hide the picker when not visible
                     ),
                     Divider(),
                     ListTile(
+                      
                         onTap: () {
                           _showFrostedGlassDialog1(context,ac.paperWidth.value);
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+                          borderRadius: BorderRadius.circular(20.0),
                         ),
                         title: Text(
                           'Line distance',
@@ -181,6 +231,7 @@ void bot_sheet(BuildContext context, GlobalKey globalKey) {
                         trailing: IconButton(
                             padding: EdgeInsets.zero,
                             onPressed: () {
+                              HapticFeedback.selectionClick();
                               _showFrostedGlassDialog(context);
                             },
                             icon: Icon(Icons.info_outline_rounded))),
@@ -201,7 +252,7 @@ void bot_sheet(BuildContext context, GlobalKey globalKey) {
                         }
                       },
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
                       title: Text(
                         'Image Filters',
@@ -219,7 +270,7 @@ void bot_sheet(BuildContext context, GlobalKey globalKey) {
                         _showImageSavedDialog(context);
                       },
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
                       title: Text(
                         'Save Image',
